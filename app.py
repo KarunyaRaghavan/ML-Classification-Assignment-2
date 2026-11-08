@@ -93,4 +93,6 @@ try:
         st.error("The model does not contain the expected positive class 'yes'.")
         st.stop()
     yes_index = classes.index("yes")
-    y_binary = (y_true == "yes").astype(int)
+     y_binary = (y_true == "yes").astype(int)
+    auc = roc_auc_score(y_binary, probabilities[:, yes_index])
+except Exception as exc:
