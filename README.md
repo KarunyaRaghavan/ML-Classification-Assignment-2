@@ -18,14 +18,6 @@ PASTE YOUR PUBLIC GITHUB REPOSITORY URL HERE.
 ## d. Models used and evaluation metrics
 Run `python train_models.py`. Copy the actual values from the generated `metrics.csv` into this table. Do not invent or estimate metric values.
 
-| ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
-|---|---:|---:|---:|---:|---:|---:|
-| Logistic Regression | | | | | | |
-| Decision Tree | | | | | | |
-| KNN | | | | | | |
-| Naive Bayes | | | | | | |
-| Support Vector Machine | | | | | | |
-
 ### Observations on model performance
 Write observations only after reviewing your actual `metrics.csv`. Discuss the trade-off between accuracy and recall, the AUC ranking, and whether the best MCC/F1 model is also the overall winner.
 
