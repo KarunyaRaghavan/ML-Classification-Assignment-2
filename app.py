@@ -1,4 +1,6 @@
 from pathlib import Path
+
+code = r'''from pathlib import Path
 import pandas as pd
 import streamlit as st
 import joblib
@@ -11,6 +13,7 @@ from sklearn.metrics import (
 
 ROOT = Path(__file__).resolve().parent
 MODEL_DIR = ROOT / "model"
+DEFAULT_DATA_FILE = ROOT / "test_data.csv"
 
 MODEL_FILES = {
     "Logistic Regression": "logistic_regression.pkl",
@@ -23,28 +26,47 @@ MODEL_FILES = {
 st.set_page_config(page_title="Bank Marketing Classifier Lab", page_icon="📊", layout="wide")
 st.title("📊 Bank Marketing Subscription Predictor")
 st.write(
-    "Upload labelled test data, select a trained classifier, and compare its "
-    "classification performance. The app loads saved models; it does not retrain them."
+    "Select a trained classifier to evaluate the Bank Marketing test dataset. "
+    "The app loads saved models; it does not retrain them. You can also upload "
+    "a different labelled test CSV."
 )
 
 with st.sidebar:
     st.header("Model settings")
     selected_model = st.selectbox("Choose a classifier", list(MODEL_FILES.keys()))
     st.caption("All five models were trained on the same UCI Bank Marketing dataset.")
+    st.divider()
+    st.markdown("**Developed By:** KARUNYA RAGHAVAN")
+    st.markdown("**BITS ID:** 2026AK05519")
 
-uploaded_file = st.file_uploader("Upload test dataset (CSV)", type=["csv"])
-if uploaded_file is None:
-    st.info("Upload test_data.csv from the project folder. It must contain all 16 input features and the target column y.")
+uploaded_file = st.file_uploader(
+    "Optional: Upload a different test dataset (CSV)",
+    type=["csv"]
+)
+
+# Use the uploaded CSV when provided; otherwise load test_data.csv from the app's project folder.
+if uploaded_file is not None:
+    data_source = uploaded_file
+    source_label = "Uploaded test dataset"
+elif DEFAULT_DATA_FILE.exists():
+    data_source = DEFAULT_DATA_FILE
+    source_label = "Default test_data.csv"
+else:
+    st.error(
+        "The default test_data.csv file was not found in the project folder. "
+        "Add test_data.csv beside app.py in the GitHub repository, or upload a CSV above."
+    )
     st.stop()
 
 try:
-    data = pd.read_csv(uploaded_file)
+    data = pd.read_csv(data_source)
+    st.caption(f"Data source: {source_label}")
 except Exception as exc:
     st.error(f"Could not read the CSV file: {exc}")
     st.stop()
 
 if "y" not in data.columns:
-    st.error("The uploaded CSV must include the target column named 'y'.")
+    st.error("The test CSV must include the target column named 'y'.")
     st.stop()
 
 model_path = MODEL_DIR / MODEL_FILES[selected_model]
@@ -108,7 +130,7 @@ with right:
     report = classification_report(y_true, predictions, output_dict=True, zero_division=0)
     st.dataframe(pd.DataFrame(report).transpose().round(4), use_container_width=True)
 
-with st.expander("Preview uploaded data"):
+with st.expander("Preview test data"):
     st.dataframe(data.head(20), use_container_width=True)
 
 st.download_button(
@@ -117,3 +139,7 @@ st.download_button(
     file_name="predictions.csv",
     mime="text/csv"
 )
+'''
+path = Path("/mnt/data/app.py")
+path.write_text(code, encoding="utf-8")
+print(f"Created {path} ({path.stat().st_size} bytes)")
