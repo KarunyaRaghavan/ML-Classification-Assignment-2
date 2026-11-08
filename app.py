@@ -99,3 +99,54 @@ try:
 except Exception as exc:
     st.error(f"Evaluation failed. Check column names and data types. Details: {exc}")
     st.stop()
+metrics = {
+    "Accuracy": accuracy_score(y_true, predictions),
+    "AUC": auc,
+    "Precision": precision_score(y_true, predictions, pos_label="yes", zero_division=0),
+    "Recall": recall_score(y_true, predictions, pos_label="yes", zero_division=0),
+    "F1 Score": f1_score(y_true, predictions, pos_label="yes", zero_division=0),
+    "MCC": matthews_corrcoef(y_true, predictions),
+}
+
+st.subheader(f"Evaluation results — {selected_model}")
+
+cols = st.columns(6)
+for col, (name, value) in zip(cols, metrics.items()):
+    col.metric(name, f"{value:.4f}")
+
+left, right = st.columns(2)
+
+with left:
+    st.subheader("Confusion matrix")
+    cm = confusion_matrix(y_true, predictions, labels=["no", "yes"])
+    fig, ax = plt.subplots()
+    ConfusionMatrixDisplay(
+        cm, display_labels=["No", "Yes"]
+    ).plot(ax=ax, colorbar=False)
+    ax.set_title(selected_model)
+    st.pyplot(fig)
+    plt.close(fig)
+
+with right:
+    st.subheader("Classification report")
+    report = classification_report(
+        y_true, predictions, output_dict=True, zero_division=0
+    )
+    st.dataframe(
+        pd.DataFrame(report).transpose().round(4),
+        use_container_width=True
+    )
+
+with st.expander("Preview test data"):
+    st.dataframe(data.head(20), use_container_width=True)
+
+st.download_button(
+    "Download predictions",
+    data=pd.DataFrame({
+        "Actual": y_true,
+        "Predicted": predictions
+    }).to_csv(index=False),
+    file_name="predictions.csv",
+    mime="text/csv"
+)
+    
